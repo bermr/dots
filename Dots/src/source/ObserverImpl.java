@@ -1,24 +1,25 @@
 package source;
 
 import java.awt.BorderLayout;
-import java.io.ByteArrayInputStream;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class ObserverImpl implements Observer{
 	private Panel panel;
 	private boolean isOpen = true;
-	public ObserverImpl() {
+	private Socket subject;
+	
+	public ObserverImpl() throws UnknownHostException, IOException {
 		Frame points = new Frame();
 		panel = new Panel();
-		points.setLayout(new BorderLayout()); 
 		points.add(panel, BorderLayout.CENTER);
-		points.setSize(500, 500);
-		points.setVisible(true);
-		
+				
 		try {
 			start();
 		} catch (Exception e) {
@@ -26,38 +27,31 @@ public class ObserverImpl implements Observer{
 		}
 	}
 	
-	public static void main(String args[]) {
-		new ObserverImpl();
+	public static void main(String args[]) throws UnknownHostException, IOException {
+		ObserverImpl obs = new ObserverImpl();
 	}
 	
 	public void start() throws IOException {
-		DatagramPacket packet = null;
-		DatagramSocket socket = new DatagramSocket(7070);
-		socket.setBroadcast(true);
-
-		while(this.isOpen ){
-			byte[] buf = new byte[socket.getReceiveBufferSize()];
-			packet = new DatagramPacket(buf, buf.length);
-			socket.receive(packet);
-			
-			ObjectInputStream iStream;
-			iStream = new ObjectInputStream(new ByteArrayInputStream(packet.getData()));
-
-			new Thread(()->{
-				try {
-					Object[] msg = (Object []) iStream.readObject();
-					messageHandler(msg);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}).start();
+		subject = new Socket("127.0.0.1", 1234);
+		ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(subject.getInputStream()));
+		Message msg = new Message();
+		
+		while(isOpen) {
+			try{
+				msg = (Message) in.readObject();	
+				System.out.println("recebido: " + msg.getValue());
+				//messageHandler(msg);
+			}catch(Exception e){
+				e.printStackTrace();;
+			}
 		}
-		socket.close();
 	}
 
-	private void messageHandler(Object[] msg) {
-		ArrayList<Dot> dots1 = (ArrayList<Dot>) msg[1]; 
-		draw(dots1);
+	@SuppressWarnings("unchecked")
+	private void messageHandler(Message msg) {
+		System.out.println(msg.getValue());
+		//ArrayList<Dot> dots1 = msg.getDots(); 
+		//draw(dots1);
 	}
 
 	public void draw(ArrayList<Dot> dots){

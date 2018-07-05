@@ -9,10 +9,5 @@ public class Frame extends JFrame {
 
 	public static void main(String args[]) {
 		JFrame points = new JFrame();
-		points.setLayout(new BorderLayout());   
-		points.add(new Panel(), BorderLayout.CENTER);
-		points.setSize(500, 500);
-		points.setVisible(true);
-		points.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}	
 }

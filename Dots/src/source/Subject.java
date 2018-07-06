@@ -1,6 +1,5 @@
 package source;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -12,6 +11,7 @@ import java.util.Random;
 public class Subject {
 	private ServerSocket server;
 	private List<Socket> observerList;
+	boolean stop = false;
 	
 	public Subject() throws IOException {
 		observerList = new ArrayList<Socket>();
@@ -23,7 +23,7 @@ public class Subject {
 		server = new ServerSocket(1234);
 		System.out.println("Porta 1324 aberta!");
 
-		for(int i = 0; i < 1; i++) {
+		for(int i = 0; i < 2; i++) {
 			registerObserver(server.accept());
 			System.out.println(i+1 + " conectado");
 		}
@@ -36,16 +36,25 @@ public class Subject {
 	public void start() throws IOException {
 		ArrayList<Dot> dots = new ArrayList<Dot>();
 		Random r1 = new Random();
-		boolean stop = false;
+		long start = System.nanoTime();
 		do {
 			for(int i=0;i<1000;i++) {
-				int[] rgb = {r1.nextInt(255),r1.nextInt(255),r1.nextInt(255)};
-				Dot d = new Dot(r1.nextInt(1000),r1.nextInt(1000), rgb);
-				dots.add(d);
+				if (r1.nextInt(100) < 20) {
+					int[] rgb = {r1.nextInt(255),r1.nextInt(255),r1.nextInt(255)};
+					Dot d = new Dot(r1.nextInt(1000),r1.nextInt(1000), rgb);
+					dots.add(d);
+				}
+				else {
+					int[] rgbb = {0,0,0}; 
+					Dot d = new Dot(r1.nextInt(1000),r1.nextInt(1000), rgbb);
+					dots.add(d);
+				}
+				
 			}
+			if (((System.nanoTime() - start)/1000000000) > 30)
+				this.stop = true;
 			notifyObservers(dots);
 		} while (!stop);
-		
 	}
 	
 	public void registerObserver(Socket obs) throws IOException {
@@ -57,9 +66,12 @@ public class Subject {
 	}
 	
 	public void notifyObservers(ArrayList<Dot> dots) throws IOException {
-		for (int i=0;i<observerList.size();i++) {
-			ObjectOutputStream out = new ObjectOutputStream(observerList.get(i).getOutputStream());
+		for (Socket obs : observerList) {
+			ObjectOutputStream out = new ObjectOutputStream(obs.getOutputStream());
 			Message msg = new Message(dots);
+			msg.setValue("nothing");
+			if (this.stop == true)
+				msg.setValue("close");
 			out.writeObject(msg);
 			out.flush();
 		}

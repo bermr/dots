@@ -31,7 +31,7 @@ public class Panel extends JPanel{
 	public void removePoint(int x, int y){
 		Graphics g = image.getGraphics();
 		g.setColor(new Color(0,0,0));
-		g.fillOval(x, y, 6, 6);
+		g.drawLine(x, y, x, y);
 		g.dispose();
 	}
 

@@ -20,11 +20,7 @@ public class ObserverImpl implements Observer{
 		panel = new Panel();
 		points.add(panel, BorderLayout.CENTER);
 				
-		try {
-			start();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		start();
 	}
 	
 	public static void main(String args[]) throws UnknownHostException, IOException {
@@ -33,25 +29,23 @@ public class ObserverImpl implements Observer{
 	
 	public void start() throws IOException {
 		subject = new Socket("127.0.0.1", 1234);
-		ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(subject.getInputStream()));
 		Message msg = new Message();
 		
-		while(isOpen) {
+		do {
 			try{
+				ObjectInputStream in = new ObjectInputStream(subject.getInputStream());
 				msg = (Message) in.readObject();	
-				System.out.println("recebido: " + msg.getValue());
-				//messageHandler(msg);
-			}catch(Exception e){
+				messageHandler(msg);
+				}catch(Exception e){
 				e.printStackTrace();;
 			}
-		}
+		} while(isOpen);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void messageHandler(Message msg) {
-		System.out.println(msg.getValue());
-		//ArrayList<Dot> dots1 = msg.getDots(); 
-		//draw(dots1);
+		ArrayList<Dot> dots1 = msg.getDots(); 
+		draw(dots1);
 	}
 
 	public void draw(ArrayList<Dot> dots){

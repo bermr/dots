@@ -44,11 +44,11 @@ public class Subject {
 				dots.add(d);
 			}
 			notifyObservers(dots);
-		} while (!stop );
+		} while (!stop);
 		
 	}
 	
-	public void registerObserver(Socket obs) {
+	public void registerObserver(Socket obs) throws IOException {
 		observerList.add(obs);
 	}
 	
@@ -58,9 +58,8 @@ public class Subject {
 	
 	public void notifyObservers(ArrayList<Dot> dots) throws IOException {
 		for (int i=0;i<observerList.size();i++) {
-			ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(observerList.get(i).getOutputStream()));
-			//Message msg = new Message(dots);
-			Message msg = new Message("Deu");
+			ObjectOutputStream out = new ObjectOutputStream(observerList.get(i).getOutputStream());
+			Message msg = new Message(dots);
 			out.writeObject(msg);
 			out.flush();
 		}

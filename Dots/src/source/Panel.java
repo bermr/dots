@@ -24,7 +24,7 @@ public class Panel extends JPanel{
 	public void addPoint(int x, int y, int[] rgb) {
 		Graphics g = image.getGraphics();
 		g.setColor(new Color(rgb[0],rgb[1],rgb[2]));
-		g.fillOval(x, y, 6, 6);
+		g.drawLine(x, y, x, y);
 		g.dispose();
 	}
 	

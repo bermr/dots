@@ -52,7 +52,7 @@ public class MasterSubject {
 				}
 				
 			}
-			if (((System.nanoTime() - start)/1000000000) > 60)
+			if (((System.nanoTime() - start)/1000000000) > 30)
 				this.stop = true;
 			write(dots);
 		} while (!stop);

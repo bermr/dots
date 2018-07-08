@@ -7,7 +7,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.Scanner;
+
 
 public class Subject {
 	private ServerSocket server;
@@ -27,7 +28,9 @@ public class Subject {
 	}
 	
 	private void waitRegistration() throws IOException {
-		server = new ServerSocket(1235);
+		Scanner s = new Scanner(System.in);
+		int port = s.nextInt();
+		server = new ServerSocket(port);
 		System.out.println("Subject aberto");
 		registerObserver(server.accept());
 		System.out.println("Conectado");
@@ -67,7 +70,6 @@ public class Subject {
 	
 	private void messageHandler(Message msg) throws IOException {
 		ArrayList<Dot> dots1 = msg.getDots();
-		System.out.println(msg.getValue());
 		notifyObservers(dots1);
 		if (msg.getValue().equals("close")) { 
 			this.stop = true;

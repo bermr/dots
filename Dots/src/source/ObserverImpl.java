@@ -33,7 +33,7 @@ public class ObserverImpl implements Observer{
 	}
 	
 	public static void main(String args[]) throws UnknownHostException, IOException {
-		ObserverImpl obs = new ObserverImpl();
+		new ObserverImpl();
 	}
 	
 	public void start() throws IOException {
@@ -50,7 +50,6 @@ public class ObserverImpl implements Observer{
 		} while(isOpen);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void messageHandler(Message msg) {
 		ArrayList<Dot> dots1 = msg.getDots(); 
 		draw(dots1);

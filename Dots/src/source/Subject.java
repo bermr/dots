@@ -22,11 +22,17 @@ public class Subject {
 	private void waitRegistration() throws IOException {
 		server = new ServerSocket(1234);
 		System.out.println("Porta 1324 aberta!");
-
-		for(int i = 0; i < 2; i++) {
-			registerObserver(server.accept());
-			System.out.println(i+1 + " conectado");
-		}
+		registerObserver(server.accept());
+		
+		new Thread(() ->{
+			try {
+				do{
+					registerObserver(server.accept());
+				} while(!stop);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}).start();
 	}
 
 	public static void main(String args[]) throws IOException {
@@ -51,13 +57,13 @@ public class Subject {
 				}
 				
 			}
-			if (((System.nanoTime() - start)/1000000000) > 30)
+			if (((System.nanoTime() - start)/1000000000) > 60)
 				this.stop = true;
 			notifyObservers(dots);
 		} while (!stop);
 	}
 	
-	public void registerObserver(Socket obs) throws IOException {
+	public synchronized void registerObserver(Socket obs) throws IOException {
 		observerList.add(obs);
 	}
 	
@@ -65,7 +71,7 @@ public class Subject {
 		observerList.remove(obs);
 	}
 	
-	public void notifyObservers(ArrayList<Dot> dots) throws IOException {
+	public synchronized void notifyObservers(ArrayList<Dot> dots) throws IOException {
 		for (Socket obs : observerList) {
 			ObjectOutputStream out = new ObjectOutputStream(obs.getOutputStream());
 			Message msg = new Message(dots);
@@ -78,3 +84,4 @@ public class Subject {
 	}
 	
 }
+

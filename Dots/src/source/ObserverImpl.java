@@ -16,15 +16,7 @@ public class ObserverImpl implements Observer{
 		Frame points = new Frame();
 		panel = new Panel();
 		points.add(panel, BorderLayout.CENTER);
-		
-		/*new Thread(() ->{
-			try {
-				start();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}).start();*/
-		
+				
 		try {
 			start();
 		} catch (IOException e) {
@@ -35,9 +27,9 @@ public class ObserverImpl implements Observer{
 	public static void main(String args[]) throws UnknownHostException, IOException {
 		new ObserverImpl();
 	}
-	
+		
 	public void start() throws IOException {
-		subject = new Socket("127.0.0.1", 1234);
+		subject = new Socket("127.0.0.1", 1235);
 		Message msg = new Message();
 		do {
 			try{

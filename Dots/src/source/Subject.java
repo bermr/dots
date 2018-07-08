@@ -1,6 +1,7 @@
 package source;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -11,18 +12,26 @@ import java.util.Random;
 public class Subject {
 	private ServerSocket server;
 	private List<Socket> observerList;
+	private Socket master;
 	boolean stop = false;
 	
 	public Subject() throws IOException {
 		observerList = new ArrayList<Socket>();
+		master = new Socket("127.0.0.1", 1234);
 		waitRegistration();
 		start();
 	}
 	
+	public static void main(String args[]) throws IOException {
+		new Subject();
+	}
+	
 	private void waitRegistration() throws IOException {
-		server = new ServerSocket(1234);
-		System.out.println("Porta 1324 aberta!");
+		server = new ServerSocket(1235);
+		System.out.println("Subject aberto");
 		registerObserver(server.accept());
+		System.out.println("Conectado");
+		notifyMaster();
 		
 		new Thread(() ->{
 			try {
@@ -34,33 +43,37 @@ public class Subject {
 			}
 		}).start();
 	}
+	
+	public void notifyMaster() throws IOException {
+		ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
+		Message msg = new Message();
+		msg.setValue("nothing");
+		out.writeObject(msg);
+		out.flush();
+	}
 
-	public static void main(String args[]) throws IOException {
-		new Subject();
+	public void start() throws IOException {
+		Message msg = new Message();
+		do {
+			try{
+				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
+				msg = (Message) in.readObject();	
+				messageHandler(msg);
+				}catch(Exception e){
+					e.printStackTrace();;
+				}
+		} while(!stop);
 	}
 	
-	public void start() throws IOException {
-		ArrayList<Dot> dots = new ArrayList<Dot>();
-		Random r1 = new Random();
-		long start = System.nanoTime();
-		do {
-			for(int i=0;i<1000;i++) {
-				if (r1.nextInt(100) < 20) {
-					int[] rgb = {r1.nextInt(255),r1.nextInt(255),r1.nextInt(255)};
-					Dot d = new Dot(r1.nextInt(1000),r1.nextInt(1000), rgb);
-					dots.add(d);
-				}
-				else {
-					int[] rgbb = {0,0,0}; 
-					Dot d = new Dot(r1.nextInt(1000),r1.nextInt(1000), rgbb);
-					dots.add(d);
-				}
-				
-			}
-			if (((System.nanoTime() - start)/1000000000) > 60)
-				this.stop = true;
-			notifyObservers(dots);
-		} while (!stop);
+	private void messageHandler(Message msg) throws IOException {
+		ArrayList<Dot> dots1 = msg.getDots();
+		System.out.println(msg.getValue());
+		notifyObservers(dots1);
+		if (msg.getValue().equals("close")) { 
+			this.stop = true;
+			System.out.println("end");
+		}
+		
 	}
 	
 	public synchronized void registerObserver(Socket obs) throws IOException {

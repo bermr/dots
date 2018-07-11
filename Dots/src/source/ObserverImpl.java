@@ -41,14 +41,15 @@ public class ObserverImpl implements Observer{
 					ObjectInputStream in = new ObjectInputStream(subject.getInputStream());
 					msg = (Message) in.readObject();	
 					messageHandler(msg);
+					subject.close();
 					}catch(Exception e){
-						subject.close();
 						Socket soc = new Socket("192.168.0.232", 1236);
 						ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
 						msg = (Message) in.readObject();
 						soc.close();
-						messageHandler2(msg);
+						messageHandler(msg);
 						isOpen = false;
+						subject.close();
 					}
 			} while(isOpen);
 		}catch(Exception e) {
@@ -56,37 +57,15 @@ public class ObserverImpl implements Observer{
 		}
 	}
 	
-	private void messageHandler2(Message msg) {
-		if (msg.getValue().equals("reconectar")) {
-			try {
-				subject = new Socket(msg.getIp(), 1235);
-				Message msg2 = new Message();
-				this.ip = msg.getIp();
-				do {
-					try{
-						//subject.setSoTimeout(1500);
-						ObjectInputStream in = new ObjectInputStream(subject.getInputStream());
-						msg2 = (Message) in.readObject();	
-						messageHandler(msg2);
-						}catch(Exception e){
-							Socket soc = new Socket("192.168.0.232", 1236);
-							ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
-							msg2 = (Message) in.readObject();
-							messageHandler2(msg2);
-						}
-				} while(isOpen);
-			}catch(Exception e) {
-				//se cair conecta dnv
-			}
-		}
-	}
-
 	private void messageHandler(Message msg) {
 		ArrayList<Dot> dots1 = msg.getDots(); 
 		draw(dots1);
 		if (msg.getValue().equals("close")) { 
 			this.isOpen = false;
 			System.out.println("end");
+		}
+		if (msg.getValue().equals("reconectar")) {
+			this.ip = msg.getIp();
 		}
 	}
 

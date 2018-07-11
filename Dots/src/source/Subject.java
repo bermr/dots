@@ -71,7 +71,7 @@ public class Subject {
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
 				msg = (Message) in.readObject();	
 				messageHandler(msg);
-				System.out.println(observerList.size());
+				//System.out.println(observerList.size());
 				}catch(Exception e){
 					//System.out.println("eRRO");
 				}
@@ -98,7 +98,7 @@ public class Subject {
 	
 	public synchronized void notifyObservers(ArrayList<Dot> dots) throws IOException {
 		for (Socket obs : observerList) {
-			System.out.println(obs.getInetAddress().toString());
+			//System.out.println(obs.getInetAddress().toString());
 			ObjectOutputStream out = new ObjectOutputStream(obs.getOutputStream());
 			Message msg = new Message(dots);
 			msg.setValue("nothing");

@@ -1,15 +1,30 @@
 package source;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Message implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private String value;
 	private String ip;
 	private ArrayList<Dot> dots;
+	private ArrayList<String> ips;
 
 	public Message(String v) {
 		this.value = v;
+		this.ips = new ArrayList<String>();
+	}
+	
+	public void setIps(ArrayList<String> ips) {
+		this.ips = ips;
+	}
+	
+	public void addIp(String ip) {
+		this.ips.add(ip);
+	}
+	
+	public ArrayList<String> getIps() {
+		return this.ips;
 	}
 	
 	public Message(ArrayList<Dot> dots) {

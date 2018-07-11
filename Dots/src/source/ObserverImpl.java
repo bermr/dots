@@ -29,17 +29,22 @@ public class ObserverImpl implements Observer{
 	}
 		
 	public void start() throws IOException {
-		subject = new Socket("127.0.0.1", 1235);
-		Message msg = new Message();
-		do {
-			try{
-				ObjectInputStream in = new ObjectInputStream(subject.getInputStream());
-				msg = (Message) in.readObject();	
-				messageHandler(msg);
-				}catch(Exception e){
-					e.printStackTrace();;
-				}
-		} while(isOpen);
+		try {
+			subject = new Socket("192.168.0.232", 1235);
+			Message msg = new Message();
+			do {
+				try{
+					//subject.setSoTimeout(1500);
+					ObjectInputStream in = new ObjectInputStream(subject.getInputStream());
+					msg = (Message) in.readObject();	
+					messageHandler(msg);
+					}catch(Exception e){
+						e.printStackTrace();;
+					}
+			} while(isOpen);
+		}catch(Exception e) {
+			//se cair conecta dnv
+		}
 	}
 
 	private void messageHandler(Message msg) {

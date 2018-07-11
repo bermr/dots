@@ -7,18 +7,21 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 
 public class Subject {
 	private ServerSocket server;
 	private List<Socket> observerList;
 	private Socket master;
+	private ArrayList<String> ips;
+
 	boolean stop = false;
 	
 	public Subject() throws IOException {
+		ips = new ArrayList<String>();
 		observerList = new ArrayList<Socket>();
 		master = new Socket("127.0.0.1", 1234);
+		
 		waitRegistration();
 		start();
 	}
@@ -28,14 +31,18 @@ public class Subject {
 	}
 	
 	private void waitRegistration() throws IOException {
-		Scanner s = new Scanner(System.in);
-		int port = s.nextInt();
-		server = new ServerSocket(port);
+		//Scanner s = new Scanner(System.in);
+		//int port = s.nextInt();
+		String ip;
+		server = new ServerSocket(1235);
 		System.out.println("Subject aberto");
-		registerObserver(server.accept());
-		System.out.println("Conectado");
+		for (int i=0 ; i< 1 ; i++) {
+			registerObserver(server.accept());
+			System.out.println("Conectado");
+			ip = observerList.get(i).getInetAddress().toString();
+			ips.add(ip);
+		}
 		notifyMaster();
-		
 		new Thread(() ->{
 			try {
 				do{
@@ -51,6 +58,7 @@ public class Subject {
 		ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
 		Message msg = new Message();
 		msg.setValue("nothing");
+		msg.setIps(ips);
 		out.writeObject(msg);
 		out.flush();
 	}
@@ -63,7 +71,7 @@ public class Subject {
 				msg = (Message) in.readObject();	
 				messageHandler(msg);
 				}catch(Exception e){
-					e.printStackTrace();;
+					//System.out.println("eRRO");
 				}
 		} while(!stop);
 	}

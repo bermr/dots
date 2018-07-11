@@ -6,17 +6,21 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class MasterSubject {
 	private ServerSocket server;
 	private List<Socket> subjectList;
+	private Map<String, ArrayList<String>> controlList;
 	public boolean stop = false;
-	public int subNumber = 1;
+	public int subNumber = 2;
 	public int obsNumber;
 	
 	public MasterSubject() throws IOException, ClassNotFoundException {
+		controlList = new HashMap<String, ArrayList<String>>();
 		subjectList = new ArrayList<Socket>();
 		server = new ServerSocket(1234);
 		System.out.println("Master aberto");
@@ -32,6 +36,12 @@ public class MasterSubject {
 		Message msg = new Message();	
 		ObjectInputStream in = new ObjectInputStream(subjectList.get(0).getInputStream());
 		msg = (Message) in.readObject();	
+		controlList.put(subjectList.get(0).getInetAddress().toString(), msg.getIps());
+		
+		ObjectInputStream in2 = new ObjectInputStream(subjectList.get(1).getInputStream());
+		msg = (Message) in2.readObject();	
+		controlList.put(subjectList.get(1).getInetAddress().toString(), msg.getIps());
+		
 	}
 	
 	public void start() throws IOException {
@@ -60,13 +70,30 @@ public class MasterSubject {
 	
 	private void write(ArrayList<Dot> dots) throws IOException {
 		for (Socket sub : subjectList) {
-			ObjectOutputStream out = new ObjectOutputStream(sub.getOutputStream());
-			Message msg = new Message(dots);
-			msg.setValue("nothing");
-			if (this.stop == true)
-				msg.setValue("close");
-			out.writeObject(msg);
-			out.flush();
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(sub.getOutputStream());
+				Message msg = new Message(dots);
+				msg.setValue("nothing");
+				if (this.stop == true)
+					msg.setValue("close");
+				sub.setSoTimeout(1500);
+				out.writeObject(msg);
+				out.flush();
+			} catch(Exception e) {
+				ArrayList<String> ipsRealloc = controlList.get(sub.getInetAddress().toString());
+				subjectList.remove(sub);
+				ArrayList<String> ipsRealloc2 = controlList.get(subjectList.get(0).getInetAddress().toString());
+				ArrayList<String> aux = new ArrayList<String>();
+				for (String s : ipsRealloc) {
+					aux.add(s);
+					System.out.println(s);
+				}
+				for (String s : ipsRealloc2) {
+					aux.add(s);
+					System.out.println(s);
+				}
+				//System.out.println("socket" + sub.getRemoteSocketAddress() + "down");
+			}
 		}
 		
 	}
@@ -77,5 +104,7 @@ public class MasterSubject {
 	
 	public void registerSubject(Socket s) {
 		subjectList.add(s);
+		//System.out.println(s.getInetAddress().toString() +" " + s.getRemoteSocketAddress().toString());
+		//controlList.put(s.getInetAddress().toString(), s.getRemoteSocketAddress().toString());
 	}
 }

@@ -69,30 +69,46 @@ public class MasterSubject {
 	}
 	
 	private void write(ArrayList<Dot> dots) throws IOException {
-		for (Socket sub : subjectList) {
+		for (int i=0 ; i<subjectList.size(); i++) {
 			try {
-				ObjectOutputStream out = new ObjectOutputStream(sub.getOutputStream());
+				ObjectOutputStream out = new ObjectOutputStream(subjectList.get(i).getOutputStream());
 				Message msg = new Message(dots);
 				msg.setValue("nothing");
 				if (this.stop == true)
 					msg.setValue("close");
-				sub.setSoTimeout(1500);
+				//sub.setSoTimeout(1500);
 				out.writeObject(msg);
 				out.flush();
 			} catch(Exception e) {
-				ArrayList<String> ipsRealloc = controlList.get(sub.getInetAddress().toString());
-				subjectList.remove(sub);
-				ArrayList<String> ipsRealloc2 = controlList.get(subjectList.get(0).getInetAddress().toString());
+				ArrayList<String> ipsRealloc = controlList.get(subjectList.get(i).getInetAddress().toString());
+				//subjectList.remove(sub);
+				ArrayList<String> ipsRealloc2 = new ArrayList<String>();
+				if (i == 0) {
+					ipsRealloc2 = controlList.get(subjectList.get(1).getInetAddress().toString());
+				}
+				else {
+					ipsRealloc2 = controlList.get(subjectList.get(0).getInetAddress().toString());
+				}
 				ArrayList<String> aux = new ArrayList<String>();
 				for (String s : ipsRealloc) {
 					aux.add(s);
-					System.out.println(s);
 				}
 				for (String s : ipsRealloc2) {
 					aux.add(s);
-					System.out.println(s);
 				}
-				//System.out.println("socket" + sub.getRemoteSocketAddress() + "down");
+				if (i ==0) {
+					controlList.put(subjectList.get(1).getInetAddress().toString(), aux);
+					for (int j=0; j<((CharSequence) controlList.get(subjectList.get(1).getInetAddress().toString())).length();j++) {
+						System.out.println(controlList.get(1).get(j));
+					}
+				}
+				else {
+					controlList.put(subjectList.get(0).getInetAddress().toString(), aux);
+					for (int j=0; j<((CharSequence) controlList.get(subjectList.get(0).getInetAddress().toString())).length();j++) {
+						System.out.println(controlList.get(1).get(j));
+					}
+				}
+				
 			}
 		}
 		

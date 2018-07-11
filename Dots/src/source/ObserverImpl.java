@@ -13,12 +13,14 @@ public class ObserverImpl implements Observer{
 	private boolean isOpen = true;
 	private Socket subject;
 	private String ip;
+	private int port;
 	
 	public ObserverImpl() throws UnknownHostException, IOException {
 		Frame points = new Frame();
 		panel = new Panel();
 		points.add(panel, BorderLayout.CENTER);
 		this.ip = "192.168.0.243";
+		this.port = 1235;
 		
 		try {
 			start();
@@ -34,22 +36,21 @@ public class ObserverImpl implements Observer{
 	public void start() throws IOException {
 		Message msg = new Message();
 		try {
+			subject = new Socket(this.ip, this.port);
 			do {
 				try{
 					//subject.setSoTimeout(1500);
-					subject = new Socket(this.ip, 1235);
 					ObjectInputStream in = new ObjectInputStream(subject.getInputStream());
 					msg = (Message) in.readObject();	
 					messageHandler(msg);
-					subject.close();
 					}catch(Exception e){
-						Socket soc = new Socket("192.168.0.232", 1236);
+						subject.close();
+						Socket soc = new Socket("127.0.0.1", 1236);
 						ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
 						msg = (Message) in.readObject();
 						soc.close();
 						messageHandler(msg);
-						isOpen = false;
-						subject.close();
+						subject = new Socket(this.ip, 1238);
 					}
 			} while(isOpen);
 		}catch(Exception e) {
@@ -66,6 +67,8 @@ public class ObserverImpl implements Observer{
 		}
 		if (msg.getValue().equals("reconectar")) {
 			this.ip = msg.getIp();
+			this.port = msg.getPort();
+			System.out.println(this.ip);
 		}
 	}
 

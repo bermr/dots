@@ -102,11 +102,7 @@ public class MasterSubject {
 				for (String s : ipsRealloc2) {
 					aux.add(s);
 				}
-				
-				for (int j=0; j<aux.size();j++) {
-					//System.out.println(aux.get(j));
-				}
-				
+
 				Map<String, ArrayList<String>> controlList2 = new HashMap<String, ArrayList<String>>();
 				if (i == 0) {
 					controlList.put(subjectList.get(1).getInetAddress().toString(), aux);
@@ -139,6 +135,7 @@ public class MasterSubject {
 				Message msg = new Message();
 				msg.setValue("reconectar");
 				msg.setIp(subjectList.get(0).getInetAddress().toString().substring(1));
+				msg.setPort(1238);
 				System.out.println(subjectList.get(0).getInetAddress().toString().substring(1));
 				out.writeObject(msg);
 				out.flush();

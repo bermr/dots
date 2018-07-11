@@ -34,7 +34,7 @@ public class Subject {
 		//Scanner s = new Scanner(System.in);
 		//int port = s.nextInt();
 		String ip;
-		server = new ServerSocket(1235);
+		server = new ServerSocket(1238);
 		System.out.println("Subject aberto");
 		for (int i=0 ; i< 1 ; i++) {
 			registerObserver(server.accept());

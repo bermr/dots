@@ -9,6 +9,15 @@ public class Message implements Serializable{
 	private String ip;
 	private ArrayList<Dot> dots;
 	private ArrayList<String> ips;
+	private int port;
+	
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
 
 	public Message(String v) {
 		this.value = v;

@@ -14,7 +14,9 @@ public class Subject {
 	private List<Socket> observerList;
 	private Socket master;
 	private ArrayList<String> ips;
-
+	private Long t1;
+	private Long t2=(long) 0;;
+	
 	boolean stop = false;
 	
 	public Subject() throws IOException {
@@ -67,6 +69,7 @@ public class Subject {
 	public void start() throws IOException {
 		Message msg = new Message();
 		do {
+			t1 = System.currentTimeMillis();
 			try{
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
 				msg = (Message) in.readObject();	
@@ -75,6 +78,8 @@ public class Subject {
 				}catch(Exception e){
 					//System.out.println("eRRO");
 				}
+			t2 = System.currentTimeMillis();
+			System.out.println((((double) t2.longValue()) - t1.longValue())/1000 + "s");
 		} while(!stop);
 	}
 	

@@ -19,6 +19,9 @@ public class MasterSubject {
 	public int subNumber = 2;
 	public int obsNumber;
 	
+	private Long t1;
+	private Long t2=(long) 0;;
+	
 	public MasterSubject() throws IOException, ClassNotFoundException {
 		controlList = new HashMap<String, ArrayList<String>>();
 		subjectList = new ArrayList<Socket>();
@@ -64,6 +67,7 @@ public class MasterSubject {
 		Random r1 = new Random();
 		long start = System.nanoTime();
 		do {
+			t1 = System.currentTimeMillis();
 			for(int i=0;i<1000;i++) {
 				if (r1.nextInt(100) < 20) {
 					int[] rgb = {r1.nextInt(255),r1.nextInt(255),r1.nextInt(255)};
@@ -80,12 +84,13 @@ public class MasterSubject {
 			if (((System.nanoTime() - start)/1000000000) > 30)
 				this.stop = true;
 			write(dots);
+			t2 = System.currentTimeMillis();
+			System.out.println((((double) t2.longValue()) - t1.longValue())/1000 + "s");
 		} while (!stop);
 	}
 	
 	private void write(ArrayList<Dot> dots) throws IOException {
 		int var = -1;
-		int var2 = -1;
 		ArrayList<String> aux = new ArrayList<String>();
 		for (int i=0 ; i<subjectList.size(); i++) {
 			try {
@@ -130,8 +135,6 @@ public class MasterSubject {
 			}
 		}
 		if (var != -1) {
-			if (var == 0) var2 = 1;
-			if (var == 1) var2 = 0;
 			subjectList.remove(var);
 			//syncObservers(var2, aux);
 		}

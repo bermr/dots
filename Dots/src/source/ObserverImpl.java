@@ -3,6 +3,7 @@ package source;
 import java.awt.BorderLayout;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -39,7 +40,12 @@ public class ObserverImpl implements Observer{
 					msg = (Message) in.readObject();	
 					messageHandler(msg);
 					}catch(Exception e){
-						e.printStackTrace();;
+						subject.close();
+						Socket soc = new Socket("192.168.0.232", 1236);
+						ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
+						msg = (Message) in.readObject();
+						soc.close();
+						messageHandler(msg);
 					}
 			} while(isOpen);
 		}catch(Exception e) {
@@ -55,6 +61,27 @@ public class ObserverImpl implements Observer{
 			System.out.println("end");
 		}
 		
+		if (msg.getValue().equals("reconectar")) {
+			try {
+				subject = new Socket(msg.getIp(), 1235);
+				Message msg1 = new Message();
+				do {
+					try{
+						//subject.setSoTimeout(1500);
+						ObjectInputStream in = new ObjectInputStream(subject.getInputStream());
+						msg1 = (Message) in.readObject();	
+						messageHandler(msg);
+						}catch(Exception e){
+							Socket soc = new Socket("192.168.0.232", 1236);
+							ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
+							msg = (Message) in.readObject();
+							messageHandler(msg);
+						}
+				} while(isOpen);
+			}catch(Exception e) {
+				//se cair conecta dnv
+			}
+		}
 	}
 
 	public void draw(ArrayList<Dot> dots){

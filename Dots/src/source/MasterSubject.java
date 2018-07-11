@@ -35,8 +35,13 @@ public class MasterSubject {
 	public void waitObservers() throws IOException, ClassNotFoundException {
 		Message msg = new Message();	
 		ObjectInputStream in = new ObjectInputStream(subjectList.get(0).getInputStream());
-		msg = (Message) in.readObject();	
+		msg = (Message) in.readObject();
+		
 		controlList.put(subjectList.get(0).getInetAddress().toString(), msg.getIps());
+		//System.out.println(controlList.containsKey(subjectList.get(0).getInetAddress().toString()));
+		/*for (int j=0; j<msg.getIps().size();j++) {
+			System.out.println(controlList.get(subjectList.get(0).getInetAddress().toString()).get(j));
+		}*/
 		
 		ObjectInputStream in2 = new ObjectInputStream(subjectList.get(1).getInputStream());
 		msg = (Message) in2.readObject();	
@@ -69,6 +74,7 @@ public class MasterSubject {
 	}
 	
 	private void write(ArrayList<Dot> dots) throws IOException {
+		int var = -1;
 		for (int i=0 ; i<subjectList.size(); i++) {
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(subjectList.get(i).getOutputStream());
@@ -96,18 +102,47 @@ public class MasterSubject {
 				for (String s : ipsRealloc2) {
 					aux.add(s);
 				}
-				if (i ==0) {
+				
+				for (int j=0; j<aux.size();j++) {
+					//System.out.println(aux.get(j));
+				}
+				
+				Map<String, ArrayList<String>> controlList2 = new HashMap<String, ArrayList<String>>();
+				if (i == 0) {
 					controlList.put(subjectList.get(1).getInetAddress().toString(), aux);
-					for (int j=0; j<((CharSequence) controlList.get(subjectList.get(1).getInetAddress().toString())).length();j++) {
-						System.out.println(controlList.get(1).get(j));
-					}
+					this.controlList = controlList2;
+					
 				}
 				else {
-					controlList.put(subjectList.get(0).getInetAddress().toString(), aux);
-					for (int j=0; j<((CharSequence) controlList.get(subjectList.get(0).getInetAddress().toString())).length();j++) {
-						System.out.println(controlList.get(1).get(j));
+					controlList2.put(subjectList.get(0).getInetAddress().toString(), aux);
+					this.controlList = controlList2;
+					for (int j=0; j<aux.size();j++) {
+						System.out.println(controlList.get(subjectList.get(0).getInetAddress().toString()).get(j));
 					}
 				}
+				syncObservers();
+				var = i;
+				break;
+			}
+		}
+		if (var != -1) {
+			subjectList.remove(var);
+		}
+	}
+
+	private void syncObservers() {
+		for (int i= 0; i< controlList.get(subjectList.get(0).getInetAddress().toString()).size();i++) {
+			try {
+				Socket soc = new Socket(
+						controlList.get(subjectList.get(0).getInetAddress().toString()).get(i), 1236);
+				ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
+				Message msg = new Message();
+				msg.setValue("reconectar");
+				msg.setIp(subjectList.get(0).getInetAddress().toString().substring(1));
+				System.out.println(subjectList.get(0).getInetAddress().toString().substring(1));
+				out.writeObject(msg);
+				out.flush();
+			} catch (Exception e) {
 				
 			}
 		}

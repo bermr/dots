@@ -44,13 +44,14 @@ public class ObserverImpl implements Observer{
 					msg = (Message) in.readObject();	
 					messageHandler(msg);
 					}catch(Exception e){
+						//wait(2000);
 						subject.close();
-						Socket soc = new Socket("127.0.0.1", 1236);
-						ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
-						msg = (Message) in.readObject();
-						soc.close();
-						messageHandler(msg);
-						subject = new Socket(this.ip, 1238);
+						//Socket soc = new Socket("127.0.0.1", 1236);
+						//ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
+						//msg = (Message) in.readObject();
+						//soc.close();
+						//messageHandler(msg);
+						subject = new Socket("192.168.0.232", 1238);
 					}
 			} while(isOpen);
 		}catch(Exception e) {
@@ -68,7 +69,6 @@ public class ObserverImpl implements Observer{
 		if (msg.getValue().equals("reconectar")) {
 			this.ip = msg.getIp();
 			this.port = msg.getPort();
-			System.out.println(this.ip);
 		}
 	}
 

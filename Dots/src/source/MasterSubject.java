@@ -29,6 +29,16 @@ public class MasterSubject {
 			System.out.println("Conectado");
 		}
 		waitObservers();
+		new Thread(() ->{
+			try {
+				do{
+					registerSubject(server.accept());
+					System.out.println("Conectado");
+				} while(!stop);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}).start();
 		start();
 	}
 	
@@ -75,6 +85,8 @@ public class MasterSubject {
 	
 	private void write(ArrayList<Dot> dots) throws IOException {
 		int var = -1;
+		int var2 = -1;
+		ArrayList<String> aux = new ArrayList<String>();
 		for (int i=0 ; i<subjectList.size(); i++) {
 			try {
 				ObjectOutputStream out = new ObjectOutputStream(subjectList.get(i).getOutputStream());
@@ -95,7 +107,7 @@ public class MasterSubject {
 				else {
 					ipsRealloc2 = controlList.get(subjectList.get(0).getInetAddress().toString());
 				}
-				ArrayList<String> aux = new ArrayList<String>();
+				
 				for (String s : ipsRealloc) {
 					aux.add(s);
 				}
@@ -105,42 +117,41 @@ public class MasterSubject {
 
 				Map<String, ArrayList<String>> controlList2 = new HashMap<String, ArrayList<String>>();
 				if (i == 0) {
-					controlList.put(subjectList.get(1).getInetAddress().toString(), aux);
+					controlList2.put(subjectList.get(1).getInetAddress().toString(), aux);
 					this.controlList = controlList2;
 					
 				}
 				else {
 					controlList2.put(subjectList.get(0).getInetAddress().toString(), aux);
 					this.controlList = controlList2;
-					for (int j=0; j<aux.size();j++) {
-						System.out.println(controlList.get(subjectList.get(0).getInetAddress().toString()).get(j));
-					}
 				}
-				syncObservers();
 				var = i;
 				break;
 			}
 		}
 		if (var != -1) {
+			if (var == 0) var2 = 1;
+			if (var == 1) var2 = 0;
 			subjectList.remove(var);
+			//syncObservers(var2, aux);
 		}
 	}
 
-	private void syncObservers() {
-		for (int i= 0; i< controlList.get(subjectList.get(0).getInetAddress().toString()).size();i++) {
+	private void syncObservers(int k, List<String> aux) {
+		for (int i= 0; i<aux.size()-1;i++) {
 			try {
-				Socket soc = new Socket(
-						controlList.get(subjectList.get(0).getInetAddress().toString()).get(i), 1236);
-				ObjectOutputStream out = new ObjectOutputStream(soc.getOutputStream());
+				ServerSocket soc = new ServerSocket(1236);		
+				Socket s = soc.accept();
+				ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
 				Message msg = new Message();
 				msg.setValue("reconectar");
-				msg.setIp(subjectList.get(0).getInetAddress().toString().substring(1));
+				msg.setIp("192.168.0.232");
 				msg.setPort(1238);
-				System.out.println(subjectList.get(0).getInetAddress().toString().substring(1));
 				out.writeObject(msg);
 				out.flush();
+				soc.close();
 			} catch (Exception e) {
-				
+				System.out.println("nao enviou");
 			}
 		}
 		

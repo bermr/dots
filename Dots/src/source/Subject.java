@@ -47,6 +47,7 @@ public class Subject {
 			try {
 				do{
 					registerObserver(server.accept());
+					System.out.println("Conectado");
 				} while(!stop);
 			} catch (IOException e) {
 				e.printStackTrace();

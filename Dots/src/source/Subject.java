@@ -15,7 +15,7 @@ public class Subject {
 	private Socket master;
 	private ArrayList<String> ips;
 	private Long t1;
-	private Long t2=(long) 0;;
+	private Long t2=(long) 0;
 	
 	boolean stop = false;
 	
@@ -94,6 +94,7 @@ public class Subject {
 	}
 	
 	public synchronized void registerObserver(Socket obs) throws IOException {
+		obs.setSoTimeout(2500);
 		observerList.add(obs);
 	}
 	

@@ -20,7 +20,7 @@ public class MasterSubject {
 	public int obsNumber;
 	
 	private Long t1;
-	private Long t2=(long) 0;;
+	private Long t2=(long) 0;
 	
 	public MasterSubject() throws IOException, ClassNotFoundException {
 		controlList = new HashMap<String, ArrayList<String>>();
@@ -99,10 +99,9 @@ public class MasterSubject {
 				msg.setValue("nothing");
 				if (this.stop == true)
 					msg.setValue("close");
-				//sub.setSoTimeout(1500);
 				out.writeObject(msg);
 				out.flush();
-			} catch(Exception e) {
+			} catch(IOException e) {
 				ArrayList<String> ipsRealloc = controlList.get(subjectList.get(i).getInetAddress().toString());
 				//subjectList.remove(sub);
 				ArrayList<String> ipsRealloc2 = new ArrayList<String>();
@@ -157,7 +156,6 @@ public class MasterSubject {
 				System.out.println("nao enviou");
 			}
 		}
-		
 	}
 
 	public static void main(String agrs[]) throws IOException, ClassNotFoundException {

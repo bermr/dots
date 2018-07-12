@@ -3,7 +3,6 @@ package source;
 import java.awt.BorderLayout;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -16,7 +15,7 @@ public class ObserverImpl implements Observer{
 	private int port;
 	private int frame;
 	private Long t1;
-	private Long t2=(long) 0;;
+	private Long t2=(long) 0;
 	
 	public ObserverImpl() throws UnknownHostException, IOException {
 		Frame points = new Frame();
@@ -41,27 +40,30 @@ public class ObserverImpl implements Observer{
 		Message msg = new Message();
 		try {
 			subject = new Socket(this.ip, this.port);
+			ObjectInputStream in = null;
 			do {
 				System.out.println(frame);
 				try{
-					//subject.setSoTimeout(1500);
-					ObjectInputStream in = new ObjectInputStream(subject.getInputStream());
-					msg = (Message) in.readObject();	
+					in = new ObjectInputStream(subject.getInputStream());
+					msg = (Message) in.readObject();
+					subject.setSoTimeout(2500);
 					messageHandler(msg);
-					frame++;
+					this.frame++;
 					}catch(Exception e){
 						//wait(2000);
-						subject.close();
 						//Socket soc = new Socket("127.0.0.1", 1236);
 						//ObjectInputStream in = new ObjectInputStream(soc.getInputStream());
 						//msg = (Message) in.readObject();
 						//soc.close();
 						//messageHandler(msg);
+						in.close();
+						subject.close();
+						System.out.println("veio aqui");
 						subject = new Socket("192.168.0.232", 1238);
 					}
 			} while(isOpen);
 		}catch(Exception e) {
-			//se cair conecta dnv
+			
 		}
 	}
 	

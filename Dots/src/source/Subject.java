@@ -14,24 +14,26 @@ public class Subject {
 	private List<Socket> observerList;
 	private Socket master;
 	private ArrayList<String> ips;
+
 	private Long t1;
 	private Long t2=(long) 0;
-	
+	private double soma;
+
 	boolean stop = false;
-	
+
 	public Subject() throws IOException {
 		ips = new ArrayList<String>();
 		observerList = new ArrayList<Socket>();
 		master = new Socket("127.0.0.1", 1234);
-		
+
 		waitRegistration();
 		start();
 	}
-	
+
 	public static void main(String args[]) throws IOException {
 		new Subject();
 	}
-	
+
 	private void waitRegistration() throws IOException {
 		//Scanner s = new Scanner(System.in);
 		//int port = s.nextInt();
@@ -56,7 +58,7 @@ public class Subject {
 			}
 		}).start();
 	}
-	
+
 	public void notifyMaster() throws IOException {
 		ObjectOutputStream out = new ObjectOutputStream(master.getOutputStream());
 		Message msg = new Message();
@@ -68,40 +70,43 @@ public class Subject {
 
 	public void start() throws IOException {
 		Message msg = new Message();
+		int c = 0;
 		do {
 			t1 = System.currentTimeMillis();
 			try{
 				ObjectInputStream in = new ObjectInputStream(master.getInputStream());
-				msg = (Message) in.readObject();	
+				msg = (Message) in.readObject();
 				messageHandler(msg);
 				//System.out.println(observerList.size());
 				}catch(Exception e){
 					//System.out.println("eRRO");
 				}
 			t2 = System.currentTimeMillis();
-			System.out.println((((double) t2.longValue()) - t1.longValue())/1000 + "s");
+			soma += ((((double) t2.longValue()) - t1.longValue())/1000);
+			c++;
+			System.out.println(soma/c);
 		} while(!stop);
 	}
-	
+
 	private void messageHandler(Message msg) throws IOException {
 		ArrayList<Dot> dots1 = msg.getDots();
 		notifyObservers(dots1);
-		if (msg.getValue().equals("close")) { 
+		if (msg.getValue().equals("close")) {
 			this.stop = true;
 			System.out.println("end");
 		}
-		
+
 	}
-	
+
 	public synchronized void registerObserver(Socket obs) throws IOException {
 		obs.setSoTimeout(2500);
 		observerList.add(obs);
 	}
-	
+
 	public void unregisterObserver(Socket obs) {
 		observerList.remove(obs);
 	}
-	
+
 	public synchronized void notifyObservers(ArrayList<Dot> dots) throws IOException {
 		for (Socket obs : observerList) {
 			//System.out.println(obs.getInetAddress().toString());
@@ -114,6 +119,6 @@ public class Subject {
 			out.flush();
 		}
 	}
-	
+
 }
 

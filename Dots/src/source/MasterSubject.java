@@ -16,12 +16,13 @@ public class MasterSubject {
 	private List<Socket> subjectList;
 	private Map<String, ArrayList<String>> controlList;
 	public boolean stop = false;
-	public int subNumber = 2;
+	public int subNumber = 1;
 	public int obsNumber;
-	
+
 	private Long t1;
 	private Long t2=(long) 0;
-	
+    private double soma;
+
 	public MasterSubject() throws IOException, ClassNotFoundException {
 		controlList = new HashMap<String, ArrayList<String>>();
 		subjectList = new ArrayList<Socket>();
@@ -44,51 +45,54 @@ public class MasterSubject {
 		}).start();
 		start();
 	}
-	
+
 	public void waitObservers() throws IOException, ClassNotFoundException {
-		Message msg = new Message();	
+		Message msg = new Message();
 		ObjectInputStream in = new ObjectInputStream(subjectList.get(0).getInputStream());
 		msg = (Message) in.readObject();
-		
+
 		controlList.put(subjectList.get(0).getInetAddress().toString(), msg.getIps());
 		//System.out.println(controlList.containsKey(subjectList.get(0).getInetAddress().toString()));
 		/*for (int j=0; j<msg.getIps().size();j++) {
 			System.out.println(controlList.get(subjectList.get(0).getInetAddress().toString()).get(j));
 		}*/
-		
+        /*
 		ObjectInputStream in2 = new ObjectInputStream(subjectList.get(1).getInputStream());
-		msg = (Message) in2.readObject();	
-		controlList.put(subjectList.get(1).getInetAddress().toString(), msg.getIps());
-		
+		msg = (Message) in2.readObject();
+		controlList.put(subjectList.get(1).getInetAddress().toString(), msg.getIps());*/
+
 	}
-	
+
 	public void start() throws IOException {
 		ArrayList<Dot> dots = new ArrayList<Dot>();
 		Random r1 = new Random();
 		long start = System.nanoTime();
+        int c = 0;
 		do {
 			t1 = System.currentTimeMillis();
-			for(int i=0;i<1000;i++) {
-				if (r1.nextInt(100) < 20) {
+			for(int i=0;i<100;i++) {
+				if (r1.nextInt(100) < 5) {
 					int[] rgb = {r1.nextInt(255),r1.nextInt(255),r1.nextInt(255)};
 					Dot d = new Dot(r1.nextInt(1000),r1.nextInt(1000), rgb);
 					dots.add(d);
 				}
 				else {
-					int[] rgbb = {0,0,0}; 
+					int[] rgbb = {0,0,0};
 					Dot d = new Dot(r1.nextInt(1000),r1.nextInt(1000), rgbb);
 					dots.add(d);
 				}
-				
+
 			}
 			if (((System.nanoTime() - start)/1000000000) > 30)
 				this.stop = true;
 			write(dots);
 			t2 = System.currentTimeMillis();
-			System.out.println((((double) t2.longValue()) - t1.longValue())/1000 + "s");
+			soma += ((((double) t2.longValue()) - t1.longValue())/1000);
+            c++;
+            System.out.println(soma/c);
 		} while (!stop);
 	}
-	
+
 	private void write(ArrayList<Dot> dots) throws IOException {
 		int var = -1;
 		ArrayList<String> aux = new ArrayList<String>();
@@ -111,7 +115,7 @@ public class MasterSubject {
 				else {
 					ipsRealloc2 = controlList.get(subjectList.get(0).getInetAddress().toString());
 				}
-				
+
 				for (String s : ipsRealloc) {
 					aux.add(s);
 				}
@@ -123,7 +127,7 @@ public class MasterSubject {
 				if (i == 0) {
 					controlList2.put(subjectList.get(1).getInetAddress().toString(), aux);
 					this.controlList = controlList2;
-					
+
 				}
 				else {
 					controlList2.put(subjectList.get(0).getInetAddress().toString(), aux);
@@ -142,7 +146,7 @@ public class MasterSubject {
 	private void syncObservers(int k, List<String> aux) {
 		for (int i= 0; i<aux.size()-1;i++) {
 			try {
-				ServerSocket soc = new ServerSocket(1236);		
+				ServerSocket soc = new ServerSocket(1236);
 				Socket s = soc.accept();
 				ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
 				Message msg = new Message();
@@ -161,7 +165,7 @@ public class MasterSubject {
 	public static void main(String agrs[]) throws IOException, ClassNotFoundException {
 		new MasterSubject();
 	}
-	
+
 	public void registerSubject(Socket s) {
 		subjectList.add(s);
 		//System.out.println(s.getInetAddress().toString() +" " + s.getRemoteSocketAddress().toString());
